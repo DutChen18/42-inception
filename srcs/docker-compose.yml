@@ -1,0 +1,47 @@
+services:
+  nginx:
+    build: requirements/nginx
+    restart: always
+    volumes: ["wordpress:/var/www/html"]
+    depends_on: ["wordpress", "adminer"]
+    ports: ["443:443"]
+  wordpress:
+    build: requirements/wordpress
+    restart: always
+    volumes: ["wordpress:/var/www/html"]
+    env_file: [".env"]
+    depends_on: ["mariadb", "redis"]
+  mariadb:
+    build: requirements/mariadb
+    restart: always
+    volumes: ["mariadb:/var/lib/mysql"]
+    env_file: [".env"]
+  redis:
+    build: requirements/redis
+    restart: always
+  vsftpd:
+    build: requirements/vsftpd
+    restart: always
+    volumes: ["wordpress:/var/www/html"]
+    env_file: [".env"]
+    ports: ["20:20", "21:21", "21100-21110:21100-21110"]
+  static:
+    build: requirements/static
+    restart: always
+    ports: ["80:80"]
+  adminer:
+    build: requirements/adminer
+    restart: always
+    depends_on: ["mariadb"]
+volumes:
+  wordpress:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/csteenvo/data/wordpress
+  mariadb:
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/csteenvo/data/mariadb
+networks: {}
